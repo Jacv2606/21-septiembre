@@ -1306,44 +1306,18 @@ tick();
 /* ============================================================
    Música ambiental
    ============================================================ */
-let audioCtx = null;
+let audioEl = null;
 
 function startAmbientMusic() {
-  if (audioCtx) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioEl) {
+    audioEl.play().catch(() => {});
     return;
   }
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return;
-  try { audioCtx = new AC(); } catch (e) { return; }
-
-  const master = audioCtx.createGain();
-  master.gain.setValueAtTime(0, audioCtx.currentTime);
-  master.gain.linearRampToValueAtTime(0.14, audioCtx.currentTime + 4);
-  master.connect(audioCtx.destination);
-
-  const notes = [65.41, 98.00, 130.81, 196.00, 261.63, 329.63, 392.00];
-  notes.forEach((freq, i) => {
-    const osc = audioCtx.createOscillator();
-    osc.type = i < 2 ? 'sine' : (i % 2 ? 'sine' : 'triangle');
-    osc.frequency.value = freq;
-    osc.detune.value = (Math.random() - 0.5) * 6;
-
-    const g = audioCtx.createGain();
-    g.gain.value = 0.12 / (1 + i * 0.18);
-
-    const lfo = audioCtx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.04 + Math.random() * 0.09;
-    const lfoGain = audioCtx.createGain();
-    lfoGain.gain.value = g.gain.value * 0.65;
-    lfo.connect(lfoGain);
-    lfoGain.connect(g.gain);
-    lfo.start();
-
-    osc.connect(g);
-    g.connect(master);
-    osc.start();
+  audioEl = new Audio('Flores Amarillas.mp3');
+  audioEl.loop = true;          // se repite en bucle
+  audioEl.volume = 0.5;         // volumen entre 0 y 1
+  audioEl.play().catch(() => {
+    console.warn('El navegador bloqueó el audio. Necesita interacción del usuario.');
   });
 }
 
